@@ -34,6 +34,8 @@ async function run() {
       res.send(result);
     })
 
+  app
+
     app.post("/addCraftItem", async (req, res) => {
       const users = req.body;
       const result = await craftCollection.insertOne(users);
