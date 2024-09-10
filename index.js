@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -9,7 +9,9 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.dyqxkty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = "mongodb://localhost:27017";
+
+// const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.dyqxkty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -28,17 +30,69 @@ async function run() {
     const database = client.db("Arts&craftItemDB");
     const craftCollection = database.collection("craftItem");
 
-    app.get("/allCraftItems", async(req, res) => {
+    // const database = client.db("Arts&craftItemDB");
+    // const craftCollection = database.collection("craftItem");
+    // Ceramics and Pottery
+    const potteryCollection = client.db("ceramicsAndPottery").collection.apply("potteryItem")
+
+
+    app.get("/allCraftItems", async (req, res) => {
       const query = craftCollection.find();
       const result = await query.toArray();
       res.send(result);
-    })
+    });
 
-  app
+    app.get("/ceramicsAndPottery", async (req, res) => {
+      const query = potteryCollection.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+
+    app.get("/allCraftItems/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/myCraftItems/:email", async (req, res) => {
+      const email = { email: req.params.email };
+      const result = await craftCollection.find(email).toArray();
+      res.send(result);
+    });
 
     app.post("/addCraftItem", async (req, res) => {
       const users = req.body;
       const result = await craftCollection.insertOne(users);
+      res.send(result);
+    });
+
+    app.put("/update/:id", async (req, res) => {
+      const user = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedUser = {
+        $set: { 
+          itemName: user.itemName,
+          subcategoryName: user.subcategoryName,
+          shortDescription: user.shortDescription,
+          price: user.price,
+          rating: user.rating,
+          processingTime: user.processingTime,
+          customization: user.customization,
+          stockStatus: user.stockStatus,
+          photo: user.photo
+        },
+      };
+      const result = await craftCollection.updateOne(filter, updatedUser, options);
+      res.send(result);
+    });
+
+    app.delete("/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftCollection.deleteOne(query);
       res.send(result);
     });
 
