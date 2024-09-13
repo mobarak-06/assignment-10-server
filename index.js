@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb://localhost:27017";
+const uri = process.env.LOCAL_URL;
 
 // const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.dyqxkty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -30,20 +30,12 @@ async function run() {
     const database = client.db("Arts&craftItemDB");
     const craftCollection = database.collection("craftItem");
 
-    // const database = client.db("Arts&craftItemDB");
-    // const craftCollection = database.collection("craftItem");
-    // Ceramics and Pottery
-    const potteryCollection = client.db("ceramicsAndPottery").collection.apply("potteryItem")
+    const database2 = client.db("ceramicsAndPottery");
+    const potteryCollection = database2.collection("potteryItem");
 
 
     app.get("/allCraftItems", async (req, res) => {
       const query = craftCollection.find();
-      const result = await query.toArray();
-      res.send(result);
-    });
-
-    app.get("/ceramicsAndPottery", async (req, res) => {
-      const query = potteryCollection.find();
       const result = await query.toArray();
       res.send(result);
     });
@@ -95,6 +87,28 @@ async function run() {
       const result = await craftCollection.deleteOne(query);
       res.send(result);
     });
+
+    // ceramicsAndPottery database
+
+    app.get("/ceramicsAndPottery", async (req, res) => {
+      const query = potteryCollection.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+
+    app.get("/ceramicsAndPottery/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await potteryCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.post("/ceramicsAndPottery", async(req, res) => {
+      const ceramicsAndPotteryItem = req.body;
+      console.log(ceramicsAndPotteryItem);
+      const result = await potteryCollection.insertOne(ceramicsAndPotteryItem);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
