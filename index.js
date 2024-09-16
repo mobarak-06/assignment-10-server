@@ -9,20 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-
-// SbyNtQatSEHQSwyf
-// SbyNtQatSEHQSwyf
-// assignment-10-pro
-
-
-// 
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dyqxkty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-
-console.log(uri);
-
-// const uri = "mongodb+srv://assignment-10-pro:SbyNtQatSEHQSwyf@cluster0.dyqxkty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -30,7 +17,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -43,7 +30,6 @@ async function run() {
 
     const database2 = client.db("ceramicsAndPottery");
     const potteryCollection = database2.collection("potteryItem");
-
 
     app.get("/allCraftItems", async (req, res) => {
       const query = craftCollection.find();
@@ -76,7 +62,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedUser = {
-        $set: { 
+        $set: {
           itemName: user.itemName,
           subcategoryName: user.subcategoryName,
           shortDescription: user.shortDescription,
@@ -85,10 +71,14 @@ async function run() {
           processingTime: user.processingTime,
           customization: user.customization,
           stockStatus: user.stockStatus,
-          photo: user.photo
+          photo: user.photo,
         },
       };
-      const result = await craftCollection.updateOne(filter, updatedUser, options);
+      const result = await craftCollection.updateOne(
+        filter,
+        updatedUser,
+        options
+      );
       res.send(result);
     });
 
@@ -107,25 +97,25 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/ceramicsAndPottery/:id", async(req, res) => {
+    app.get("/ceramicsAndPottery/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await potteryCollection.findOne(query);
       res.send(result);
-    })
+    });
 
-    app.post("/ceramicsAndPottery", async(req, res) => {
+    app.post("/ceramicsAndPottery", async (req, res) => {
       const ceramicsAndPotteryItem = req.body;
       console.log(ceramicsAndPotteryItem);
       const result = await potteryCollection.insertOne(ceramicsAndPotteryItem);
       res.send(result);
-    })
-
-
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -133,12 +123,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
-// 
-
-
-
+//
 
 app.get("/", (req, res) => {
   res.send("Hello From Backend Of Assignment 10");
